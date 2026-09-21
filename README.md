@@ -1,4 +1,9 @@
-# MoFox-Android
+# MoFox-Android 魔改版 (naxida)
+
+> **⚠️ 个人魔改仓库**：本仓库为 [ikun-1145141/MoFox-Android](https://github.com/ikun-1145141/MoFox-Android) 的个人二次开发版，与原仓库完全独立，不追踪原仓库提交。
+> 原项目归属与版权请访问上游仓库。本仓库仅用于个人学习、修改与实验。
+
+---
 
 [Neo-MoFox](https://github.com/MoFox-Studio/Neo-MoFox) 的安卓原生外壳 App。自带完整 Linux 运行时（proot + Debian 13），不依赖 Termux，安装即可用。原生层负责 OOBE、实例管理、内嵌运行时、终端、保活与系统级设置。
 
