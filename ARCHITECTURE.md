@@ -515,7 +515,7 @@ MoFox-Android/
 ├── eula.md / PRIVACY.md               # 许可与隐私
 ├── tools/
 │   └── build.py                       # 构建脚本（pub get + build apk + 复制产物）
-├── dist/                              # CI / 本地构建产物（不入仓）
+├── dist/                              # 本地构建产物（不入仓）
 └── app/
     ├── pubspec.yaml
     ├── analysis_options.yaml
@@ -584,7 +584,7 @@ MoFox-Android/
     │   ├── legal/                     # eula.md / privacy.md
     │   ├── scripts/                   # 注入到 rootfs 的初始化脚本
     │   └── rootfs/
-    │       └── debian-13-<abi>.tar.xz      # CI 拉取，不入仓
+    │       └── debian-13-<abi>.tar.xz      # 构建时拉取，不入仓
     ├── android/
     │   └── app/
     │       ├── build.gradle.kts
@@ -603,7 +603,7 @@ MoFox-Android/
     │       │   │       ├── RuntimeProcessManager.kt
     │       │   │       ├── RuntimeScripts.kt
     │       │   │       └── NativePty.kt
-    │       │   └── jniLibs/                   # CI 拉取，不入仓
+    │       │   └── jniLibs/                   # 构建时拉取，不入仓
     │       │       └── arm64-v8a/
     │       │           ├── libmofoxpty.so
     │       │           ├── libbash.so
@@ -670,13 +670,19 @@ MoFox-Android/
 | Widget | `flutter_test` | 向导每一步、设置面板、终端壳 |
 | 集成 | `integration_test` | 真机 / 模拟器跑完整 OOBE、实例安装与外部浏览器 intent |
 | Kotlin | JUnit + Robolectric | RootfsInstaller、CommandBuilder、FakeProcSysdata |
-| 端到端 | 手动 + GitHub Actions Macrobenchmark（后续） | 冷启动 / OOBE 总耗时 / WebUI 浏览器跳转 |
+| 端到端 | 手动（本地 + 真机） | 冷启动 / OOBE 总耗时 / WebUI 浏览器跳转 |
 
-CI 阶段：
+本仓库**不启用** GitHub Actions 自动构建。代码改完后使用 `tools/build.py` 在本地手动构建 APK：
 
-- PR：`flutter analyze --no-fatal-infos` + `flutter test`，**不**构建 APK，**不**下 rootfs。
-- Push：当前支持 `arm64-v8a`，下载对应 `libxxx.so` + `debian-13-arm64.tar.xz`，构建 debug APK 上传 artifact。
-- Nightly：每天 02:00 BJT 构建 `arm64-v8a` debug APK；手动触发可选 debug / release；定时和手动构建都会重建并发布到 `nightly` 预发布 tag。
+```bash
+# Debug 构建（arm64-v8a）
+python tools/build.py --fetch-rootfs --target-platform android-arm64 --artifact-label arm64-v8a
+
+# Release 构建
+python tools/build.py --release --fetch-rootfs --target-platform android-arm64 --artifact-label arm64-v8a
+```
+
+产物输出到 `dist/` 目录，自行上传到 GitHub Releases 即可。
 
 ---
 
@@ -706,7 +712,7 @@ CI 阶段：
   - [x] proot 命令拼装与首次启动
   - [x] 首页（系统概览 + 主图模式）+ 管理（实例卡片）+ 终端 + 设置
   - [x] 前台服务保活
-  - [x] arm64-v8a CI 构建
+  - [x] arm64-v8a 本地构建（`tools/build.py`）
   - [x] 彩色终端（xterm 主题 + .bashrc 注入）
   - [x] ANSI 彩色日志渲染（AnsiColorText）
   - [x] App 级日志系统（双路输出 + 导出分享）

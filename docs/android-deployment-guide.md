@@ -56,8 +56,6 @@ MoFox Android App 会在应用内部安装一套独立的 Debian 13 运行环境
 
 - [GitHub Releases](https://github.com/ikun-1145141/MoFox-Android/releases)
 
-Beta 测试期间，安装包可能以预发布版或 Nightly 版本提供。Nightly 是自动构建的最新预览版本，包含最新改动，但稳定性通常低于正式发布的 Beta 版本。
-
 下载适用于 `arm64-v8a` 的 APK 后：
 
 1. 在 Android 文件管理器中打开 APK；
@@ -267,7 +265,6 @@ Bot 运行后，点击“WebUI”进入 Neo-MoFox 管理面板。NapCat 运行�
 - 当前主要支持单个 Bot 和单个 NapCat 同时运行；
 - 不同版本间的配置和运行环境可能发生变化；
 - 自动升级、异常恢复和设备兼容性仍在持续完善；
-- Nightly 构建未经完整发布验证，可能出现回归问题；
 - 部分故障仍需要通过安装日志、运行日志或终端手动排查。
 
 ## 12. 获取帮助与反馈

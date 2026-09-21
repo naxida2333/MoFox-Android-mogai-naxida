@@ -159,11 +159,21 @@ python tools/build.py --target-platform android-arm64 --artifact-label arm64-v8a
 
 多 ABI 调试时把对应 ABI 的 jniLibs + rootfs 都准备好，再用不同 `--target-platform` 分别打包。
 
-## CI / Nightly
+## 构建说明
 
-- **PR**：`flutter pub get` + `flutter analyze --no-fatal-infos` + `flutter test`，**不构建 APK，不下载运行时**。
-- **Push**：按当前支持的 `arm64-v8a` 拉取 jniLibs + rootfs，构建 debug APK 上传 artifact。
-- **Nightly**：每天北京时间 02:00 构建 `arm64-v8a` APK；手动触发可选 `debug` / `release`，定时和手动构建都会重建 `nightly` 预发布。
+本仓库**不启用自动构建**。使用 `tools/build.py` 在本地手动构建 APK：
+
+```bash
+# Debug 构建
+python tools/build.py --fetch-rootfs --target-platform android-arm64 --artifact-label arm64-v8a
+
+# Release 构建
+python tools/build.py --release --fetch-rootfs --target-platform android-arm64 --artifact-label arm64-v8a
+```
+
+`tools/build.py` 会自动下载对应架构的 `libproot.so` 和 `debian-13-<abi>.tar.xz`，产物输出到 `dist/` 目录。
+
+> 提交代码前请在本地跑 `flutter analyze --no-fatal-infos` 和 `flutter test`。
 
 ## 常见构建问题
 
