@@ -1,7 +1,6 @@
-# MoFox-Android 魔改版 (naxida)
+# MoFox-Android 个人魔改
 
-> **⚠️ 个人魔改仓库**：本仓库为 [ikun-1145141/MoFox-Android](https://github.com/ikun-1145141/MoFox-Android) 的个人二次开发版，与原仓库完全独立，不追踪原仓库提交。
-> 原项目归属与版权请访问上游仓库。本仓库仅用于个人学习、修改与实验。
+> **个人魔改仓库**：本仓库为 [ikun-1145141/MoFox-Android](https://github.com/ikun-1145141/MoFox-Android) 的个人二次开发版。原项目归属与版权请访问上游仓库。
 
 ---
 
