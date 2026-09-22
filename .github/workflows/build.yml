@@ -100,16 +100,18 @@ jobs:
             - 原生壳 + proot Linux + Debian 13 rootfs
             - APK 由 GitHub Actions 自动构建（固定 release 签名）
 
-      - name: Draft Release (main branch)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Continuous Release
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "continuous-${{ github.sha }}"
-          name: "Continuous Build ${{ github.sha }}"
+          tag_name: "continuous-${{ github.run_id }}"
+          name: "Continuous Build #${{ github.run_id }}"
           files: dist/*.apk
           draft: false
-          prerelease: true
+          prerelease: false
           body: |
-            自动构建产物 (来自 ${{ github.sha }} on main)。
+            自动构建产物
+            - Run ID: ${{ github.run_id }}
+            - Commit: ${{ github.sha }}
             - ABI: arm64-v8a
-            - 非正式 release，仅作测试下载。
+            - APK 由 GitHub Actions 自动构建（固定 release 签名）
