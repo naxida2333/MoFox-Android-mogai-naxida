@@ -1,11 +1,11 @@
-# MoFox-Android 个人魔改
+# MoFox-Android（个人 fork）
 
-## 🔗 原始仓库（基项目）
+## 🔗 上游原仓库
 
 | 项目 | 地址 |
 |------|------|
-| **原仓库** | https://github.com/ikun-1145141/MoFox-Android |
-| **本仓库** | https://github.com/naxida2333/MoFox-Android-mogai-naxida |
+| **MoFox-Android（上游原仓库）** | https://github.com/ikun-1145141/MoFox-Android |
+| **本仓库（个人 fork）** | 基于上游构建，AGPL-3.0 保持一致 |
 
 ---
 
