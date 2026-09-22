@@ -33,6 +33,10 @@ GITHUB_MIRRORS=(
     "https://github.tbedu.top"
 )
 
+# ============ Release 资产下载地址（可按需替换为自建镜像源）============
+NAPCAT_RELEASE_URL="https://github.com/naxida2333/NapCat-Installer/releases/download/v4.18.28/NapCat.Shell.zip"
+QQ_ARM64_DEB_URL="https://github.com/naxida2333/QQ/releases/download/V1.0/QQ_3.2.32_260812_arm64_01.deb"
+
 # ============ 日志 ============
 function log() {
     time=$(date +"%Y-%m-%d %H:%M:%S")
@@ -114,7 +118,7 @@ function network_test() {
     # 手动指定代理序号 (1..N)
     if [[ "${current_proxy_setting}" =~ ^[0-9]+$ && "${current_proxy_setting}" -ge 1 && "${current_proxy_setting}" -le ${#proxy_arr[@]} ]]; then
         log "手动指定代理: ${proxy_arr[$((current_proxy_setting - 1))]}"
-        target_proxy="${proxy_arr[$((current_proxy_setting - 1))]}"
+        target_proxy="${proxy_arr[$((current_proxy_setting - 1)))}"
     # 明确禁用代理 (0)
     elif [ "${current_proxy_setting}" == "0" ]; then
         log "代理已关闭, 将直连 ${parm1}..."
@@ -252,7 +256,7 @@ function download_napcat() {
     else
         log "开始下载 NapCat 安装包..."
         network_test "Github"
-        local napcat_download_url="${target_proxy:+${target_proxy}/}https://github.com/naxida2333/NapCat-Installer/releases/download/v4.18.28/NapCat.Shell.zip"
+        local napcat_download_url="${target_proxy:+${target_proxy}/}${NAPCAT_RELEASE_URL}"
 
         # 关键修复：检查 curl 退出码
         curl -k -L -# "${napcat_download_url}" -o "${default_file}" || fail "NapCat 安装包下载失败 (curl 退出码: $?)，请检查网络或代理设置"
@@ -278,7 +282,7 @@ function download_napcat() {
 }
 
 # ============ QQ 安装 ============
-# 目标 QQ 版本：优先从腾讯 CDN 动态获取，硬编码回退使用 naxida2333/QQ release
+# 目标 QQ 版本：优先从腾讯 CDN 动态获取，arm64 硬编码回退到自建镜像源
 function get_qq_target_version() {
     linuxqq_target_version="3.2.32-260812"
 }
@@ -399,11 +403,11 @@ function install_linuxqq_rootless() {
     QQ_URL_ARM_DEB=""
     QQ_URL_ARM_RPM=""
 
-    # 根据架构决定 QQ 来源：arm64 走 naxida2333/QQ GitHub release，amd64 尝试腾讯官方 CDN
+    # 根据架构决定 QQ 来源：arm64 使用自建镜像源，amd64 尝试腾讯官方 CDN
     if [ "${system_arch}" = "arm64" ]; then
-        QQ_URL_ARM_DEB="https://github.com/naxida2333/QQ/releases/download/V1.0/QQ_3.2.32_260812_arm64_01.deb"
+        QQ_URL_ARM_DEB="${QQ_ARM64_DEB_URL}"
         QQ_URL_ARM_RPM=""
-        log "QQ 安装包来源: naxida2333/QQ GitHub release (arm64 deb)"
+        log "QQ 安装包来源: 自建镜像源 (arm64 deb)"
     else
         # amd64 先尝试从腾讯官方动态获取，失败则用硬编码回退
         fetch_qq_download_urls || true
