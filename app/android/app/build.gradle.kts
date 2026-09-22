@@ -20,8 +20,8 @@ android {
         // 与 targetSdk 等级下的 SELinux W^X 限制兼容。所以可以正常追到 35。
         minSdk = 24
         targetSdk = 35
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = flutter.versionCode()
+        versionName = flutter.versionName()
         ndk {
             // 只支持 arm64-v8a。32 位 ARM 装不了 napcat (Node.js)，x86 安卓没人用。
             abiFilters += listOf("arm64-v8a")
@@ -73,11 +73,8 @@ android {
     }
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-    }
-}
+// jvmTarget 跟随 android.compileOptions 的 JavaVersion.VERSION_17，不再单独声明 kotlin { compilerOptions { ... } }
+// 避免在 AGP 8.7 + Gradle 8.11 + KGP 2.3 组合下解析不到顶层 kotlin {} block
 
 flutter {
     source = "../.."
