@@ -27,6 +27,7 @@ app/android/app/debug/
 app/android/app/profile/
 **/*.jks
 **/*.keystore
+**/*.p12
 
 # ───────── iOS / macOS（保留占位但默认不构建）─────────
 app/ios/Pods/
