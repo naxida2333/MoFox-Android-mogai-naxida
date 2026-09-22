@@ -19,6 +19,20 @@ TARGET_FOLDER="$QQ_BASE_PATH/resources/app/app_launcher"
 QQ_EXECUTABLE="$QQ_BASE_PATH/qq"
 QQ_PACKAGE_JSON_PATH="$QQ_BASE_PATH/resources/app/package.json"
 
+# ============ GitHub 加速镜像（与 network_test 共用）============
+GITHUB_MIRRORS=(
+    "https://ghfast.top"
+    "https://git.yylx.win/"
+    "https://gh-proxy.com"
+    "https://ghfile.geekertao.top"
+    "https://gh-proxy.net"
+    "https://j.1win.ggff.net"
+    "https://ghm.078465.xyz"
+    "https://gitproxy.127731.xyz"
+    "https://jiashu.1win.eu.org"
+    "https://github.tbedu.top"
+)
+
 # ============ 日志 ============
 function log() {
     time=$(date +"%Y-%m-%d %H:%M:%S")
@@ -90,10 +104,10 @@ function network_test() {
     log "开始网络测试: ${parm1}... (代理设置: '${current_proxy_setting}')"
 
     if [ "${parm1}" == "Github" ]; then
-        proxy_arr=("https://ghfast.top" "https://git.yylx.win/" "https://gh-proxy.com" "https://ghfile.geekertao.top" "https://gh-proxy.net" "https://j.1win.ggff.net" "https://ghm.078465.xyz" "https://gitproxy.127731.xyz" "https://jiashu.1win.eu.org" "https://github.tbedu.top")
+        proxy_arr=("${GITHUB_MIRRORS[@]}")
         check_url="https://raw.githubusercontent.com/NapNeko/NapCatQQ/main/package.json"
     else
-        proxy_arr=("https://ghfast.top" "https://git.yylx.win/" "https://gh-proxy.com" "https://ghfile.geekertao.top" "https://gh-proxy.net" "https://j.1win.ggff.net" "https://ghm.078465.xyz" "https://gitproxy.127731.xyz" "https://jiashu.1win.eu.org" "https://github.tbedu.top")
+        proxy_arr=("${GITHUB_MIRRORS[@]}")
         check_url="https://raw.githubusercontent.com/NapNeko/NapCatQQ/main/package.json"
     fi
 
@@ -336,6 +350,45 @@ function compare_linuxqq_versions() {
     fi
 }
 
+# 下载 LinuxQQ 安装包：先测速选最佳代理，下载后校验 deb 完整性，
+# 无效则依次尝试所有 GitHub 加速镜像，避免直连/单代理下 205MB 大文件下载损坏。
+function download_linuxqq_package() {
+    local url="${1}" outfile="${2}"
+    local candidates=()
+
+    network_test "Github"
+
+    # 候选 URL：首选测速得到的最佳代理链接，随后逐个镜像
+    candidates+=("${target_proxy:+${target_proxy}/}${url}")
+    local m
+    for m in "${GITHUB_MIRRORS[@]}"; do
+        candidates+=("${m}/${url}")
+    done
+    # 去重（测速最佳代理可能本身就是镜像之一）
+    candidates=($(printf '%s\n' "${candidates[@]}" | awk '!seen[$0]++'))
+
+    local final_url
+    for final_url in "${candidates[@]}"; do
+        log "QQ下载: ${final_url}"
+        curl -k -L -# "${final_url}" -o "${outfile}" || true
+        if [ -s "${outfile}" ]; then
+            if [ "${package_installer}" = "dpkg" ]; then
+                if dpkg-deb --info "${outfile}" >/dev/null 2>&1; then
+                    log "QQ deb 校验通过 (${final_url})。"
+                    return 0
+                fi
+            elif [ -s "${outfile}" ]; then
+                log "QQ 安装包下载完成 (${final_url})。"
+                return 0
+            fi
+        fi
+        log "该链接下载结果无效或损坏，尝试下一个镜像..."
+        rm -f "${outfile}"
+    done
+
+    fail "QQ 安装包 (${url}) 下载失败或全部损坏"
+}
+
 function install_linuxqq_rootless() {
     get_system_arch
     log "开始安装 LinuxQQ 到 ${INSTALL_BASE_DIR}..."
@@ -390,10 +443,7 @@ function install_linuxqq_rootless() {
     fi
 
     if ! [ -f "${qq_package_file}" ]; then
-        log "QQ下载链接: ${qq_download_url}"
-        local final_qq_url="${target_proxy:+${target_proxy}/}${qq_download_url}"
-        # 关键修复：检查 curl 退出码
-        curl -k -L -# "${final_qq_url}" -o "${qq_package_file}" || fail "QQ 安装包下载失败 (curl 退出码: $?)"
+        download_linuxqq_package "${qq_download_url}" "${qq_package_file}"
     else
         log "检测到当前目录下存在 QQ 安装包, 将使用本地安装包。"
     fi
