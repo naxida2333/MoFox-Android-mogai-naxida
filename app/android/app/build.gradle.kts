@@ -4,6 +4,20 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// ============ Release 签名配置 ============
+// 优先读取仓库根目录的 key.properties（本地构建），不存在则用环境变量（GitHub Actions）。
+// 两种方式都没有时，回退到 debug 签名（开发调试用）。
+val keystoreProperties = java.util.Properties().apply {
+    val localProps = rootProject.file("key.properties")
+    if (localProps.exists()) {
+        load(localProps.inputStream())
+    }
+}
+val envStorePassword = System.getenv("KEYSTORE_PASSWORD")
+val envKeyPassword = System.getenv("KEY_PASSWORD")
+val envKeyAlias = System.getenv("KEY_ALIAS")
+val envStoreFile = System.getenv("KEYSTORE_PATH")
+
 android {
     namespace = "com.mofox.android"
     compileSdk = flutter.compileSdkVersion
@@ -62,11 +76,30 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val storePwd = envStorePassword ?: keystoreProperties.getProperty("storePassword")
+            val keyPwd   = envKeyPassword   ?: keystoreProperties.getProperty("keyPassword")
+            val keyAl    = envKeyAlias      ?: keystoreProperties.getProperty("keyAlias") ?: "upload"
+            val storeF   = envStoreFile      ?: keystoreProperties.getProperty("storeFile") ?: "upload-keystore.jks"
+
+            if (!storePwd.isNullOrEmpty() && !keyPwd.isNullOrEmpty()) {
+                storeFile = rootProject.file(storeF)
+                storePassword = storePwd
+                keyAlias = keyAl
+                keyPassword = keyPwd
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // 优先使用配置好的 release 签名，没有则回退到 debug
+            signingConfig = if (signingConfigs.getByName("release").storeFile?.exists() == true) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = false
             isShrinkResources = false
         }
