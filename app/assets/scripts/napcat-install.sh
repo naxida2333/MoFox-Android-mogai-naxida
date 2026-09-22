@@ -264,8 +264,9 @@ function download_napcat() {
 }
 
 # ============ QQ 安装 ============
+# 目标 QQ 版本：优先从腾讯 CDN 动态获取，硬编码回退使用 naxida2333/QQ release
 function get_qq_target_version() {
-    linuxqq_target_version="3.2.31-260710"
+    linuxqq_target_version="3.2.32-260812"
 }
 
 # 从腾讯官方 linuxConfig.js 动态获取最新 QQ Linux 下载地址，失败时回退到硬编码版本。
@@ -339,27 +340,31 @@ function install_linuxqq_rootless() {
     get_system_arch
     log "开始安装 LinuxQQ 到 ${INSTALL_BASE_DIR}..."
 
-    # 先尝试从官方动态获取下载地址，失败则用硬编码回退
+    # 初始化下载 URL
     QQ_URL_X64_DEB=""
     QQ_URL_X64_RPM=""
     QQ_URL_ARM_DEB=""
     QQ_URL_ARM_RPM=""
-    fetch_qq_download_urls || true
 
-    # 硬编码回退地址（版本 3.2.31-260710, 2026-07-20 发布）
-    if [ -z "${QQ_URL_X64_DEB}" ]; then
-        QQ_URL_X64_DEB="https://qqdl.gtimg.cn/qqfile/QQNT/9.9.32/release/c390e792/QQ_3.2.31_260710_amd64_01.deb"
-        QQ_URL_X64_RPM="https://qqdl.gtimg.cn/qqfile/QQNT/9.9.32/release/c390e792/QQ_3.2.31_260710_x86_64_01.rpm"
-    fi
-    if [ -z "${QQ_URL_ARM_DEB}" ]; then
-        QQ_URL_ARM_DEB="https://qqdl.gtimg.cn/qqfile/QQNT/9.9.32/release/c390e792/QQ_3.2.31_260710_arm64_01.deb"
-        QQ_URL_ARM_RPM="https://qqdl.gtimg.cn/qqfile/QQNT/9.9.32/release/c390e792/QQ_3.2.31_260710_aarch64_01.rpm"
+    # 根据架构决定 QQ 来源：arm64 走 naxida2333/QQ GitHub release，amd64 尝试腾讯官方 CDN
+    if [ "${system_arch}" = "arm64" ]; then
+        QQ_URL_ARM_DEB="https://github.com/naxida2333/QQ/releases/download/V1.0/QQ_3.2.32_260812_arm64_01.deb"
+        QQ_URL_ARM_RPM=""
+        log "QQ 安装包来源: naxida2333/QQ GitHub release (arm64 deb)"
+    else
+        # amd64 先尝试从腾讯官方动态获取，失败则用硬编码回退
+        fetch_qq_download_urls || true
+        if [ -z "${QQ_URL_X64_DEB}" ]; then
+            log "警告: amd64 官方 QQ 下载地址获取失败，腾讯 CDN 可能不可用"
+        fi
     fi
 
     local qq_download_url=""
     local qq_package_file=""
 
     if [ "${system_arch}" = "amd64" ]; then
+        log "警告: amd64 架构暂未在用户仓库提供 QQ 安装包"
+        log "尝试从腾讯官方 CDN 获取..."
         if [ "${package_installer}" = "rpm" ]; then
             qq_download_url="${QQ_URL_X64_RPM}"
             qq_package_file="QQ.rpm"
@@ -368,23 +373,27 @@ function install_linuxqq_rootless() {
             qq_package_file="QQ.deb"
         fi
     elif [ "${system_arch}" = "arm64" ]; then
-        if [ "${package_installer}" = "rpm" ]; then
+        if [ "${package_installer}" = "rpm" ] && [ -n "${QQ_URL_ARM_RPM}" ]; then
             qq_download_url="${QQ_URL_ARM_RPM}"
             qq_package_file="QQ.rpm"
-        else
+        elif [ -n "${QQ_URL_ARM_DEB}" ]; then
             qq_download_url="${QQ_URL_ARM_DEB}"
             qq_package_file="QQ.deb"
+        else
+            qq_download_url="${QQ_URL_ARM_RPM}"
+            qq_package_file="QQ.rpm"
         fi
     fi
 
     if [ -z "${qq_download_url}" ]; then
-        fail "获取QQ下载链接失败, 架构不支持"
+        fail "获取QQ下载链接失败, 架构 ${system_arch} 在用户仓库暂不支持"
     fi
 
     if ! [ -f "${qq_package_file}" ]; then
         log "QQ下载链接: ${qq_download_url}"
+        local final_qq_url="${target_proxy:+${target_proxy}/}${qq_download_url}"
         # 关键修复：检查 curl 退出码
-        curl -k -L -# "${qq_download_url}" -o "${qq_package_file}" || fail "QQ 安装包下载失败 (curl 退出码: $?)"
+        curl -k -L -# "${final_qq_url}" -o "${qq_package_file}" || fail "QQ 安装包下载失败 (curl 退出码: $?)"
     else
         log "检测到当前目录下存在 QQ 安装包, 将使用本地安装包。"
     fi

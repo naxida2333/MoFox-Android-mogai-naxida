@@ -8,7 +8,7 @@ import 'package:mofox_android/core/ui/app_components.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _repositoryUrl = 'https://github.com/ikun-1145141/MoFox-Android';
+const _repositoryUrl = 'https://github.com/naxida2333/MoFox-Android-mogai-naxida';
 
 final _packageInfoProvider = FutureProvider<PackageInfo>(
   (_) => PackageInfo.fromPlatform(),
