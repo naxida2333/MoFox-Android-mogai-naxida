@@ -123,7 +123,7 @@ class _MirrorTile extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     return Material(
       color: isSelected
-          ? scheme.primaryContainer.withValues(alpha: 0.3)
+          ? scheme.primaryContainer.withOpacity(0.3)
           : scheme.surfaceContainerLow,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
