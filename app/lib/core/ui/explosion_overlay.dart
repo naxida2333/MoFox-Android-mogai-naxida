@@ -160,7 +160,7 @@ class _ExplosionPainter extends CustomPainter {
       final alpha = (1 - dt).clamp(0.0, 1.0);
 
       final paint = Paint()
-        ..color = p.color.withOpacity(alpha)
+        ..color = p.color.withValues(alpha: alpha)
         ..style = PaintingStyle.fill;
 
       canvas.drawCircle(Offset(px, py), p.size * (1 - dt * 0.5), paint);

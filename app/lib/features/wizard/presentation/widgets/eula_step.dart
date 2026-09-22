@@ -34,7 +34,7 @@ class EulaStep extends ConsumerWidget {
                 color: scheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: scheme.outlineVariant.withOpacity(0.5),
+                  color: scheme.outlineVariant.withValues(alpha: 0.5),
                 ),
               ),
               child: ClipRRect(
@@ -56,7 +56,7 @@ class EulaStep extends ConsumerWidget {
           const SizedBox(height: 16),
           Material(
             color: loaded && draft.eulaAccepted
-                ? scheme.primaryContainer.withOpacity(0.3)
+                ? scheme.primaryContainer.withValues(alpha: 0.3)
                 : scheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(12),
             child: InkWell(

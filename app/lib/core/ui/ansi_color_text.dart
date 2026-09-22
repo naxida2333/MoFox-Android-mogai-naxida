@@ -175,7 +175,7 @@ class AnsiParser {
         TextSpan(
           text: buffer.toString(),
           style: (baseStyle ?? const TextStyle()).copyWith(
-            color: dim ? effectiveFg.withOpacity(0.5) : effectiveFg,
+            color: dim ? effectiveFg.withValues(alpha: 0.5) : effectiveFg,
             backgroundColor: bg == const Color(0x00000000) ? null : bg,
             fontWeight: bold ? FontWeight.bold : null,
             fontStyle: italic ? FontStyle.italic : null,
