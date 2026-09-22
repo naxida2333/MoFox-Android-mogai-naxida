@@ -252,7 +252,7 @@ function download_napcat() {
     else
         log "开始下载 NapCat 安装包..."
         network_test "Github"
-        local napcat_download_url="${target_proxy:+${target_proxy}/}https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip"
+        local napcat_download_url="${target_proxy:+${target_proxy}/}https://github.com/naxida2333/NapCat-Installer/releases/download/v4.18.28/NapCat.Shell.zip"
 
         # 关键修复：检查 curl 退出码
         curl -k -L -# "${napcat_download_url}" -o "${default_file}" || fail "NapCat 安装包下载失败 (curl 退出码: $?)，请检查网络或代理设置"
