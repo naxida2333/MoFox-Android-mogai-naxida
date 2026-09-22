@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -7,7 +9,7 @@ plugins {
 // ============ Release 签名配置 ============
 // 优先读取仓库根目录的 key.properties（本地构建），不存在则用环境变量（GitHub Actions）。
 // 两种方式都没有时，回退到 debug 签名（开发调试用）。
-val keystoreProperties = java.util.Properties().apply {
+val keystoreProperties = Properties().apply {
     val localProps = rootProject.file("key.properties")
     if (localProps.exists()) {
         load(localProps.inputStream())
