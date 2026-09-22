@@ -453,10 +453,21 @@ function install_linuxqq_rootless() {
 
     log "正在解压 QQ 文件..."
     if [ "${package_installer}" = "dpkg" ]; then
-        dpkg -x ./${qq_package_file} ${INSTALL_BASE_DIR} || fail "解压 QQ (.deb) 失败"
+        if ! dpkg -x ./${qq_package_file} ${INSTALL_BASE_DIR}; then
+            # QQ 安装包内的 lottie 动画资源(chuo-lottie/*/effect) 在部分文件系统/容器下
+            # tar 设置目录权限(chmod)会报 ENOENT 并返回非0，但文件本身已全部解出，属良性。
+            # 这里不直接 fail，改为校验 QQ 主程序是否已解出。
+            log "提示: 解压 QQ(.deb) 时个别动画资源(chuo-lottie effect)权限设置失败，已忽略。"
+            if [ ! -x "${QQ_EXECUTABLE}" ]; then
+                fail "解压 QQ (.deb) 失败: 未找到 QQ 主程序 (${QQ_EXECUTABLE})，安装包可能不完整"
+            fi
+        fi
     elif [ "${package_installer}" = "rpm" ]; then
         rpm2cpio "${PWD}/${qq_package_file}" | (cd "${INSTALL_BASE_DIR}" && cpio -idmv) || fail "解压 QQ (.rpm) 失败"
     fi
+
+    # 确保 QQ 主程序可执行（防止 umask/proot 剥离执行位）
+    chmod +x "${QQ_EXECUTABLE}" 2>/dev/null || true
 
     rm -f "${qq_package_file}"
     update_linuxqq_config "${linuxqq_target_version}"
